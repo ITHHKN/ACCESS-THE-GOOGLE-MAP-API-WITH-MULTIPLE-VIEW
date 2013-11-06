@@ -1,0 +1,104 @@
+<html>
+    <head><title>Google Map Location Finder</title></head>
+<body>
+	
+     <h2>Put your Address to find your location into the google Map</h2>
+     <br />
+     
+        <form action="" method="post">
+             Type Your Location : <input type="text" name="myaddress" /> (eg. London,UK )
+        </form>
+     <br />
+    <?php
+  if(isset($_POST['myaddress']))
+	{
+	$myaddress = urlencode($_POST['myaddress']);
+	//here is the google api url
+	$url = "http://maps.googleapis.com/maps/api/geocode/json?address=$myaddress&sensor=false";
+	//get the content from the api using file_get_contents
+	$getmap = file_get_contents($url); 
+	//the result is in json format. To decode it use json_decode
+	$googlemap = json_decode($getmap);
+	//get the latitute, longitude from the json result by doing a for loop
+	foreach($googlemap->results as $res)
+	{
+		 $address = $res->geometry;
+		 $latlng = $address->location;
+		 $formattedaddress = $res->formatted_address;
+	
+	?>
+	<br />
+	<!-- Print the Latitude and Longitude -->
+	<?php echo "Latitude: ". $latlng->lat ."<br />". "Longitude:". $latlng->lng; ?>
+	<h2>Dynamic Location on Google Map & Direction View!</h2>
+    <h1> Google BY Dafult View  </h1>
+	<iframe class="map" width="400" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=<?php echo $myaddress;?>&amp;ie=UTF8&amp;hq=&amp;hnear=<?php echo urlencode($formattedaddress);?>&amp;t=m&amp;z=14&amp;iwloc=A&amp;output=embed"></iframe>
+	<?php
+	}
+	}
+	?>
+	<BR/>
+	
+	
+	
+	
+	
+	<script
+	src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDY0kkJiTPVd2U7aTOAwhc9ySH6oHxOIYM&sensor=false">
+	</script>
+    
+	<!--google walk street  Start --> 
+	<script>
+	var myCenter=new google.maps.LatLng('<?php echo $latlng->lat; ?>','<?php echo $latlng->lng; ?>');
+	function initialize()
+	{
+	var mapProp = {
+	  center:myCenter,
+	  zoom:18,
+	  mapTypeId:google.maps.MapTypeId.HYBRID
+	  };
+	var map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+	}
+	
+	google.maps.event.addDomListener(window, 'load', initialize);
+	</script>
+		<div id="googleMap" style="width:400px;height:350px;"></div>
+
+	
+	
+    
+		<h1>Google Maps API Demo - Street View</h1>
+		<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false"
+		 type="text/javascript"></script> 
+	  </head> 	 
+      
+      <!--google Stree View  Start --> 
+	  <body onUnload="GUnload()">
+      
+		<div id="map_canvas" style="width: 400px; height: 300px"></div> 
+	
+		<script type="text/javascript"> 
+	
+		var userLocation = '<?php echo $myaddress;?>';
+	
+		if (GBrowserIsCompatible()) {
+		   var geocoder = new GClientGeocoder();
+		   geocoder.getLocations(userLocation, function (locations) {         
+			  if (locations.Placemark)
+			  {
+				 var north = locations.Placemark[0].ExtendedData.LatLonBox.north;
+				 var south = locations.Placemark[0].ExtendedData.LatLonBox.south;
+				 var east  = locations.Placemark[0].ExtendedData.LatLonBox.east;
+				 var west  = locations.Placemark[0].ExtendedData.LatLonBox.west;
+	
+				 var bounds = new GLatLngBounds(new GLatLng(south, west), 
+												new GLatLng(north, east));
+	
+				 new GStreetviewPanorama(document.getElementById("map_canvas"), 
+										 { latlng: bounds.getCenter() });
+			  }
+		   });
+		}
+		</script> 
+</body> 
+</html>
